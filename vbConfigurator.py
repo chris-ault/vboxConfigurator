@@ -1,8 +1,8 @@
 import xmltodict
 import os
 
-vboxConfig = """C:\Users\Optiplex 9010\.VirtualBox\VirtualBox2.xml"""
-
+#vboxConfig = """C:\Users\Optiplex 9010\.VirtualBox\VirtualBox2.xml"""
+vboxConfig = """C:\Users\captn2\.VirtualBox\VirtualBox2.xml"""
 # file:     VirtualBox.xml main config file
 # uuid:     machine id to update vm disk location
 # src:      new vm disk src directory
@@ -80,16 +80,22 @@ def updateSnapDir(file, uuid, newLoc):
         x = 0
         for x in range(len(doc['VirtualBox']['Global']['MachineRegistry'])):
             for row in doc['VirtualBox']['Global']['MachineRegistry']['MachineEntry']:
+                print row['@uuid']
                 if row['@uuid'] == uuid:
                     # print row['@uuid']+'\t'+row['@src']
                     targetVbox = str(row['@src']).rsplit("""\\""",1)[0]+'\\'
                     # print targetVbox # Prints vbox file name
                     machCfg = find('.vbox', targetVbox)
-    with open(machCfg) as fd:
-        doc = xmltodict.parse(fd.read())
-        doc['VirtualBox']['Machine']['@snapshotFolder'] = newLoc
-    output = (xmltodict.unparse(doc, pretty=True))
-    return output
+
+    try:
+        with open(machCfg) as fd:
+            doc = xmltodict.parse(fd.read())
+            doc['VirtualBox']['Machine']['@snapshotFolder'] = newLoc
+        output = (xmltodict.unparse(doc, pretty=True))
+        return output
+    except NameError:
+        print "UUID not found"
+        return 1
 
 def find(pattern, path):
     for file in os.listdir(path):
@@ -101,11 +107,11 @@ def find(pattern, path):
 # print getUUIDS(vboxConfig)
 print "Vm\'s in config file"
 for each in getUUIDS(vboxConfig):
-    print getName(vboxConfig, each) + "\t" + getSnapDir(vboxConfig, each)
+    print getName(vboxConfig, each) + "\t" + getSnapDir(vboxConfig, each) + "\t" + each
 
 # Write new snapshot location
-print updateSnapDir(vboxConfig, "{4b08775c-2117-4769-9429-d7e6f5859154}", "This is a new dir")
-
+# print updateSnapDir(vboxConfig, "{4b08775c-2117-4769-9429-d7e6f5859154}", "This is a new dir")
+print updateSnapDir(vboxConfig, "{3cdf93e5-5f92-41de-ad87-c844926e2675}", "This is a new dir")
 # updateSrc("""C:\Users\Optiplex 9010\.VirtualBox\VirtualBox2.xml""","{d8f99551-4e5f-43f7-991a-119b046d8013}", """C:\New""")
 # outputFile = open("out.xml", "w")
 # outputFile.write(output)
